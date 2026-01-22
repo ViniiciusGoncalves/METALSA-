@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/3470d4df-7ffc-490f-8d29-6daa335e8835/resourceGroups/appsvc_linux_brazilsouth/providers/Microsoft.Web/sites/metalsa",
+    "appService.deploySubpath": "."
+}

@@ -3,307 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metalsa G-Code Editor</title>
+    <title>Metalsa G-Code Inteligente</title>
     <style>
-        /* --- RESET E BASE --- */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
+        /* --- ESTILOS GERAIS --- */
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        header { background-color: #004b93; color: white; padding: 15px 40px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .logo-container img { height: 40px; padding: 5px; border-radius: 4px; }
+        header h1 { font-size: 20px; font-weight: 600; margin: 0; }
 
-        /* --- HEADER E NAVEGAÇÃO --- */
-        header {
-            background-color: #004b93; /* Azul Metalsa Profundo */
-            color: white;
-            padding: 0 40px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+        /* --- LAYOUT --- */
+        .main-container { flex: 1; display: flex; justify-content: center; padding: 40px 20px; }
+        .card { background: white; width: 100%; max-width: 700px; padding: 40px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); animation: slideIn 0.4s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .brand img {
-            height: 40px;
-            //background: white;
-            padding: 5px;
-            border-radius: 4px;
-        }
-
-        /* Abas de Navegação no Header */
-        .nav-tabs {
-            display: flex;
-            gap: 10px;
-            height: 100%;
-            align-items: flex-end;
-        }
-
-        .tab-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: #ddd;
-            padding: 12px 25px;
-            font-size: 15px;
-            cursor: pointer;
-            border-radius: 8px 8px 0 0;
-            transition: all 0.3s;
-            font-weight: 600;
-        }
-
-        .tab-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-
-        .tab-btn.active {
-            background: #f4f6f9; /* Mesma cor do fundo do corpo */
-            color: #004b93;
-            border-top: 4px solid #00a0df; /* Azul claro destaque */
-        }
-
-        /* --- CONTEÚDO PRINCIPAL --- */
-        .main-content {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-            display: flex;
-            justify-content: center;
-        }
-
-        /* Ocultar abas não ativas */
-        .tab-content {
-            display: none;
-            width: 100%;
-            max-width: 1200px; /* Largura máxima para não esticar demais */
-            animation: fadeIn 0.4s;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- CARTÕES (ESTILO DO PAINEL) --- */
-        .card {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-
-        /* Estilo Específico da Aba de Configuração */
-        .config-wrapper {
-            max-width: 500px; /* Mais estreito para focar nos inputs */
-            margin: 0 auto;
-        }
-
-        /* Estilo Específico da Aba de Visualização */
-        .visual-wrapper {
-            width: 100%;
-            text-align: center;
-        }
-
-        /* --- FORMULÁRIOS --- */
-        .form-group { margin-bottom: 25px; text-align: left; }
-        label { display: block; margin-bottom: 10px; font-weight: 600; color: #333; }
-
-        input[type="file"], input[type="number"] {
-            width: 100%; padding: 12px; border: 2px solid #e1e4e8;
-            border-radius: 8px; font-size: 15px; box-sizing: border-box;
-        }
+        /* --- FORMULÁRIO --- */
+        h2 { margin-top: 0; color: #333; font-size: 22px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 25px; }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; }
+        input[type="file"], input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 15px; box-sizing: border-box; }
         input:focus { border-color: #004b93; outline: none; }
 
-        .radio-group {
-            display: flex; gap: 20px; background: #f8f9fa;
-            padding: 15px; border-radius: 8px; border: 1px solid #eee;
-        }
-        .radio-label { display: flex; align-items: center; cursor: pointer; }
-        .radio-label input { margin-right: 8px; transform: scale(1.2); }
+        /* --- RADIO BUTTONS --- */
+        .radio-group { display: flex; gap: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
+        .radio-label { display: flex; align-items: center; cursor: pointer; color: #555; }
+        .radio-label input { margin-right: 10px; transform: scale(1.2); }
+
+        /* --- TABELA --- */
+        .table-responsive { max-height: 400px; overflow-y: auto; border: 1px solid #e1e4e8; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background-color: #f1f3f5; text-align: left; padding: 12px 15px; font-size: 14px; color: #555; position: sticky; top: 0; }
+        td { padding: 10px 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
+        td strong { color: #004b93; }
+        td input[type="number"] { width: 80px; text-align: center; }
 
         /* --- BOTÕES --- */
-        .btn-action {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: bold;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; color: white; margin-top: 15px; transition: 0.2s; }
+        .btn-blue { background-color: #004b93; }
+        .btn-blue:hover { background-color: #003870; }
+        .btn-green { background-color: #28a745; }
+        .btn-green:hover { background-color: #218838; }
+        .btn-gray { background-color: #6c757d; }
+        .btn-gray:hover { background-color: #5a6268; }
 
-        .btn-download {
-            background-color: #0066cc;
-            color: white;
-        }
-        .btn-download:hover { background-color: #007fff ; transform: translateY(-2px); }
+        .link-back { display: block; text-align: center; margin-top: 20px; color: #777; text-decoration: none; font-size: 14px; }
 
-        .btn-preview {
-            background-color: #0066cc; /* Azul Ação */
-            color: white;
-            margin-bottom: 20px;
-            max-width: 300px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .btn-preview:hover { background-color: #0052a3; }
-
-        /* --- GRÁFICO --- */
-        .graph-container {
-            background: white;
-            border: 2px solid #e1e4e8;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .graph-container img {
-            width: 100%; /* Ocupa a largura total disponível */
-            height: auto;
-            max-height: 80vh; /* Limita altura para caber na tela */
-            object-fit: contain;
-        }
-
-        .placeholder-text {
-            color: #999;
-            font-style: italic;
-        }
+        /* --- VISUAL --- */
+        .visual-container img { max-width: 100%; border: 1px solid #ddd; border-radius: 8px; }
+        .no-parts-warning { background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <form action="/" method="post" enctype="multipart/form-data" id="mainForm">
+    <header>
+        <div class="logo-container">
+            <img src="{{ url_for('static', filename='images/image_1.png') }}" alt="Logo Metalsa">
+        </div>
+        <h1>Editor G-Code Inteligente</h1>
+    </header>
 
-        <header>
-            <div class="brand">
-                <img src="{{ url_for('static', filename='images/image_1.png') }}" alt="Logo">
-                <span>Editor G-Code</span>
-            </div>
+    <div class="main-container">
 
-            <nav class="nav-tabs">
-                <button type="button" class="tab-btn active" onclick="switchTab('tab-config')">
-                    ⚙️ Configurar & Baixar
-                </button>
-                <button type="button" class="tab-btn" onclick="switchTab('tab-visual')">
-                    👁️ Visualizar Desenho
-                </button>
-            </nav>
-        </header>
-
-        <div class="main-content">
-
-            <div id="tab-config" class="tab-content active card config-wrapper">
-                <h3>Configurações de Corte</h3>
-
+        {% if step == 'upload' %}
+        <div class="card">
+            <h2>📂 Passo 1: Carregar Arquivo</h2>
+            <form action="/" method="post" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label>Selecione o Arquivo G-Code:</label>
-                    <input type="file" name="arquivo" id="arquivo_input" required onchange="syncFileInput(this)">
+                    <label for="arquivo">Selecione o arquivo .TAP</label>
+                    <input type="file" name="arquivo" id="arquivo" required accept=".tap">
                 </div>
+                <div class="form-group" style="background: #e9ecef; padding: 15px; border-radius: 8px; font-size: 14px; color: #555;">
+                    ℹ️ O sistema lerá o arquivo, identificará as peças e aplicará a lógica de ciclo.
+                </div>
+                <button type="submit" name="acao" value="analisar" class="btn btn-blue">Analisar e Configurar ➜</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if step == 'config' %}
+        <div class="card">
+            <h2>⚙️ Passo 2: Configurar Parâmetros</h2>
+            <form action="/" method="post">
+                <textarea name="conteudo_oculto" style="display:none;">{{ conteudo }}</textarea>
+                <input type="hidden" name="nome_arquivo_original" value="{{ nome_arquivo }}">
 
                 <div class="form-group">
-                    <label>Espessura da Chapa:</label>
+                    <label>Espessura da Chapa (Velocidade):</label>
                     <div class="radio-group">
-                        <label class="radio-label">
-                            <input type="radio" name="espessura" value="8mm"
-                                   {% if espessura_selecionada == '8mm' or not espessura_selecionada %} checked {% endif %}>
-                            8mm (F800)
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="espessura" value="5mm"
-                                   {% if espessura_selecionada == '5mm' %} checked {% endif %}>
-                            5mm (F1000)
-                        </label>
+                        <label class="radio-label"><input type="radio" name="espessura" value="8mm" checked> <strong>8mm</strong> (F800)</label>
+                        <label class="radio-label"><input type="radio" name="espessura" value="5mm"> <strong>5mm</strong> (F1000)</label>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Limite de Aplicação (Contagem M03):</label>
-                    <input type="number" name="quantidade" min="1"
-                           value="{{ qtd_selecionada if qtd_selecionada else 1 }}" required>
-                </div>
-
-                <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-
-                <button type="submit" name="acao" value="baixar" class="btn-action btn-download">
-                    <span>PROCESSAR E BAIXAR ARQUIVO</span>
-                </button>
-
-                <p style="text-align: center; color: #777; margin-top: 20px; font-size: 0.9em;">
-                    O download iniciará automaticamente após o processamento.
-                </p>
-            </div>
-
-
-            <div id="tab-visual" class="tab-content card visual-wrapper">
-
-                <button type="submit" name="acao" value="visualizar" class="btn-action btn-preview">
-                    🔄 Gerar / Atualizar Gráfico
-                </button>
-
-                <div class="graph-container">
-                    {% if preview_img %}
-                        <img src="data:image/png;base64,{{ preview_img }}" alt="Preview G-Code">
-                    {% else %}
-                        <div class="placeholder-text">
-                            <h3>Nenhum gráfico gerado ainda.</h3>
-                            <p>Selecione um arquivo na aba de configuração e clique em "Gerar Gráfico".</p>
-                        </div>
+                    <label>Ciclo de Aplicação por Peça:</label>
+                    {% if not pecas or pecas[0] == "GENERICA" %}
+                        <div class="no-parts-warning">⚠ Peças não identificadas. Regra será geral.</div>
                     {% endif %}
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome da Peça</th>
+                                    <th style="text-align: right; width: 140px;">Limite (Ciclo)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for peca in pecas %}
+                                <tr>
+                                    <td><strong>{{ peca }}</strong>{% if peca == "GENERICA" %}<br><small>(Geral)</small>{% endif %}</td>
+                                    <td style="text-align: right;"><input type="number" name="limite_{{ peca }}" value="1" min="0"></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <small style="color: #666; display: block; margin-top: 8px;">* Lógica: Altera X, Pula 1, Zera. Último furo nunca altera.</small>
                 </div>
-            </div>
 
+                <button type="submit" name="acao" value="processar" class="btn btn-green">💾 Processar e Baixar .TAP</button>
+                <button type="submit" name="acao" value="visualizar" class="btn btn-gray">👁️ Apenas Visualizar Desenho</button>
+                <a href="/" class="link-back">Cancelar e Voltar ao Início</a>
+            </form>
         </div>
-    </form>
-
-    <script>
-        function switchTab(tabId) {
-            // Remove active de todos os botões e conteúdos
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-            // Adiciona active no alvo
-            document.getElementById(tabId).classList.add('active');
-
-            // Encontra o botão correspondente para deixar ativo visualmente
-            const buttons = document.querySelectorAll('.tab-btn');
-            if(tabId === 'tab-config') buttons[0].classList.add('active');
-            if(tabId === 'tab-visual') buttons[1].classList.add('active');
-        }
-
-        // Lógica automática: Se o Python mandou uma imagem, abre a aba Visual automaticamente
-        {% if preview_img %}
-            switchTab('tab-visual');
         {% endif %}
 
-        // Sincroniza inputs de arquivo se necessário (opcional, já que estão no mesmo form)
-        function syncFileInput(input) {
-            // Se o usuário selecionar o arquivo, podemos mudar o visual do input
-        }
-    </script>
+        {% if step == 'visual' %}
+        <div class="card visual-container" style="text-align: center;">
+            <h2>👁️ Visualização do Caminho</h2>
+
+            {% if preview_img %}
+                <img src="data:image/png;base64,{{ preview_img }}" alt="Preview">
+                <p style="color: #666; margin-top: 15px;">Visualização XY (Superior). Arcos e retas simplificados.</p>
+            {% else %}
+                <p>Erro ao gerar a visualização.</p>
+            {% endif %}
+
+            <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: center;">
+                <form action="/" method="post" style="flex: 1; max-width: 300px;">
+                    <textarea name="conteudo_oculto" style="display:none;">{{ conteudo }}</textarea>
+                    <input type="hidden" name="nome_arquivo_original" value="{{ nome_arquivo }}">
+                    <button type="submit" name="acao" value="reconfigurar" class="btn btn-gray">⬅ Voltar e Configurar</button>
+                </form>
+
+                <a href="/" class="btn btn-blue" style="flex: 1; max-width: 300px; text-decoration: none;">🔄 Novo Arquivo</a>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
 </body>
 </html>

@@ -1,155 +1,199 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metalsa G-Code</title>
-    <style>
-        /* --- ESTILOS GERAIS --- */
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
-        header { background-color: #004b93; color: white; padding: 15px 40px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .logo-container img { height: 40px; padding: 5px; border-radius: 4px; }
-        header h1 { font-size: 20px; font-weight: 600; margin: 0; }
+{% extends "base.html" %}
+{% set active_page = 'editor' %}
 
-        /* --- LAYOUT --- */
-        .main-container { flex: 1; display: flex; justify-content: center; padding: 40px 20px; }
-        .card { background: white; width: 100%; max-width: 700px; padding: 40px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); animation: slideIn 0.4s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+{% block title %}Editor G-Code{% endblock %}
 
-        /* --- FORMULÁRIO --- */
-        h2 { margin-top: 0; color: #333; font-size: 22px; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 25px; }
-        .form-group { margin-bottom: 25px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; }
-        input[type="file"], input[type="number"] { width: 100%; padding: 12px; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 15px; box-sizing: border-box; }
-        input:focus { border-color: #004b93; outline: none; }
+{% block extra_styles %}
+<style>
+    .card {
+        background: #161820;
+        width: 100%;
+        max-width: 700px;
+        padding: 40px;
+        border-radius: 12px;
+        border: 1px solid #1e2130;
+        margin: 0 auto;
+        animation: slideIn 0.4s ease-out;
+    }
 
-        /* --- RADIO BUTTONS --- */
-        .radio-group { display: flex; gap: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
-        .radio-label { display: flex; align-items: center; cursor: pointer; color: #555; }
-        .radio-label input { margin-right: 10px; transform: scale(1.2); }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
 
-        /* --- TABELA --- */
-        .table-responsive { max-height: 400px; overflow-y: auto; border: 1px solid #e1e4e8; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background-color: #f1f3f5; text-align: left; padding: 12px 15px; font-size: 14px; color: #555; position: sticky; top: 0; }
-        td { padding: 10px 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
-        td strong { color: #004b93; }
-        td input[type="number"] { width: 80px; text-align: center; }
+    h2 { margin-top: 0; color: #f1f5f9; font-size: 20px; border-bottom: 1px solid #1e2130; padding-bottom: 15px; margin-bottom: 25px; }
 
-        /* --- BOTÕES --- */
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; color: white; margin-top: 15px; transition: 0.2s; }
-        .btn-blue { background-color: #004b93; }
-        .btn-blue:hover { background-color: #003870; }
-        .btn-green { background-color: #28a745; }
-        .btn-green:hover { background-color: #218838; }
-        .btn-gray { background-color: #6c757d; }
-        .btn-gray:hover { background-color: #5a6268; }
+    .form-group { margin-bottom: 25px; }
 
-        .link-back { display: block; text-align: center; margin-top: 20px; color: #777; text-decoration: none; font-size: 14px; }
+    label { display: block; margin-bottom: 8px; font-weight: 600; color: #94a3b8; font-size: 14px; }
 
-        /* --- VISUAL --- */
-        .visual-container img { max-width: 100%; border: 1px solid #ddd; border-radius: 8px; }
-        .no-parts-warning { background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-    </style>
-</head>
-<body>
+    input[type="file"], input[type="number"] {
+        width: 100%; padding: 12px;
+        border: 1px solid #2a2d3a;
+        border-radius: 8px; font-size: 15px;
+        box-sizing: border-box;
+        background: #0f1117; color: #e2e8f0;
+    }
 
-    <header>
-        <div class="logo-container">
-            <img src="{{ url_for('static', filename='images/image_1.png') }}" alt="Logo Metalsa">
-        </div>
-        <h1>Editor G-Code</h1>
-    </header>
+    input:focus { border-color: #2563eb; outline: none; }
 
-    <div class="main-container">
+    .radio-group {
+        display: flex; gap: 20px;
+        background: #0f1117;
+        padding: 15px; border-radius: 8px;
+        border: 1px solid #1e2130;
+    }
 
-        {% if step == 'upload' %}
-        <div class="card">
-            <h2>📂 Passo 1: Carregar Arquivo</h2>
-            <form action="/" method="post" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="arquivo">Selecione o arquivo .TAP</label>
-                    <input type="file" name="arquivo" id="arquivo" required accept=".tap">
+    .radio-label { display: flex; align-items: center; cursor: pointer; color: #94a3b8; font-size: 14px; }
+    .radio-label input { margin-right: 10px; transform: scale(1.2); accent-color: #2563eb; }
+
+    .table-responsive {
+        max-height: 400px; overflow-y: auto;
+        border: 1px solid #1e2130; border-radius: 8px;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    th {
+        background-color: #1e2130;
+        text-align: left; padding: 12px 15px;
+        font-size: 13px; color: #64748b;
+        position: sticky; top: 0;
+        font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    td { padding: 10px 15px; border-bottom: 1px solid #1e2130; vertical-align: middle; color: #cbd5e1; }
+    td strong { color: #60a5fa; }
+    td input[type="number"] { width: 80px; text-align: center; padding: 6px; }
+
+    .btn {
+        width: 100%; padding: 14px;
+        border: none; border-radius: 8px;
+        font-size: 15px; font-weight: 600;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        color: white; margin-top: 12px; transition: 0.2s;
+    }
+
+    .btn-blue  { background: #1d4ed8; }
+    .btn-blue:hover  { background: #1e40af; }
+    .btn-green { background: #15803d; }
+    .btn-green:hover { background: #166534; }
+    .btn-gray  { background: #374151; }
+    .btn-gray:hover  { background: #1f2937; }
+
+    .link-back {
+        display: block; text-align: center; margin-top: 18px;
+        color: #475569; text-decoration: none; font-size: 13px;
+    }
+    .link-back:hover { color: #94a3b8; }
+
+    .visual-container img { max-width: 100%; border: 1px solid #1e2130; border-radius: 8px; }
+
+    .info-box {
+        background: #0f1117; color: #64748b;
+        padding: 14px; border-radius: 8px;
+        border: 1px solid #1e2130;
+        font-size: 13px; line-height: 1.6;
+    }
+
+    .no-parts-warning {
+        background: #2d2008; color: #fbbf24;
+        padding: 12px 15px; border-radius: 8px;
+        margin-bottom: 16px; font-size: 13px;
+        border: 1px solid #92400e;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+    {% if step == 'upload' %}
+    <div class="card">
+        <h2>📂 Passo 1: Carregar Arquivo</h2>
+        <form action="/" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="arquivo">Selecione o arquivo .TAP</label>
+                <input type="file" name="arquivo" id="arquivo" required accept=".tap">
+            </div>
+            <div class="form-group">
+                <div class="info-box">
+                    ℹ️ O sistema lerá o arquivo, identificará as peças e aplicará a lógica de ciclo de corte.
                 </div>
-                <div class="form-group" style="background: #e9ecef; padding: 15px; border-radius: 8px; font-size: 14px; color: #555;">
-                    ℹ️ O sistema lerá o arquivo, identificará as peças e aplicará a lógica de ciclo.
+            </div>
+            <button type="submit" name="acao" value="analisar" class="btn btn-blue">Analisar e Configurar ➜</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if step == 'config' %}
+    <div class="card">
+        <h2>⚙️ Passo 2: Configurar Parâmetros</h2>
+        <form action="/" method="post">
+            <textarea name="conteudo_oculto" style="display:none;">{{ conteudo }}</textarea>
+            <input type="hidden" name="nome_arquivo_original" value="{{ nome_arquivo }}">
+
+            <div class="form-group">
+                <label>Espessura da Chapa (Velocidade):</label>
+                <div class="radio-group">
+                    <label class="radio-label"><input type="radio" name="espessura" value="8mm" checked> <strong style="color:#f1f5f9;">8mm</strong>&nbsp;(F800)</label>
+                    <label class="radio-label"><input type="radio" name="espessura" value="5mm"> <strong style="color:#f1f5f9;">5mm</strong>&nbsp;(F1000)</label>
                 </div>
-                <button type="submit" name="acao" value="analisar" class="btn btn-blue">Analisar e Configurar ➜</button>
-            </form>
-        </div>
+            </div>
+
+            <div class="form-group">
+                <label>Ciclo de Aplicação por Peça:</label>
+                {% if not pecas or pecas[0] == "GENERICA" %}
+                    <div class="no-parts-warning">⚠ Peças não identificadas. Regra será aplicada de forma geral.</div>
+                {% endif %}
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome da Peça</th>
+                                <th style="text-align: right; width: 140px;">Limite (Ciclo)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for peca in pecas %}
+                            <tr>
+                                <td><strong>{{ peca }}</strong>{% if peca == "GENERICA" %}<br><small style="color:#64748b;">(Geral)</small>{% endif %}</td>
+                                <td style="text-align: right;"><input type="number" name="limite_{{ peca }}" value="1" min="0"></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <small style="color: #475569; display: block; margin-top: 8px;">* Lógica: Altera X, Pula 1, Zera. Último furo nunca altera.</small>
+            </div>
+
+            <button type="submit" name="acao" value="processar" class="btn btn-green">💾 Processar e Baixar .TAP</button>
+            <button type="submit" name="acao" value="visualizar" class="btn btn-gray">👁️ Apenas Visualizar Desenho</button>
+            <a href="/" class="link-back">Cancelar e Voltar ao Início</a>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if step == 'visual' %}
+    <div class="card visual-container" style="text-align: center;">
+        <h2>👁️ Visualização do Caminho</h2>
+
+        {% if preview_img %}
+            <img src="data:image/png;base64,{{ preview_img }}" alt="Preview">
+            <p style="color: #475569; margin-top: 15px; font-size: 13px;">Visualização XY (Superior). Arcos e retas simplificados.</p>
+        {% else %}
+            <p style="color:#ef4444;">Erro ao gerar a visualização.</p>
         {% endif %}
 
-        {% if step == 'config' %}
-        <div class="card">
-            <h2>⚙️ Passo 2: Configurar Parâmetros</h2>
-            <form action="/" method="post">
+        <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: center;">
+            <form action="/" method="post" style="flex: 1; max-width: 300px;">
                 <textarea name="conteudo_oculto" style="display:none;">{{ conteudo }}</textarea>
                 <input type="hidden" name="nome_arquivo_original" value="{{ nome_arquivo }}">
-
-                <div class="form-group">
-                    <label>Espessura da Chapa (Velocidade):</label>
-                    <div class="radio-group">
-                        <label class="radio-label"><input type="radio" name="espessura" value="8mm" checked> <strong>8mm</strong> (F800)</label>
-                        <label class="radio-label"><input type="radio" name="espessura" value="5mm"> <strong>5mm</strong> (F1000)</label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Ciclo de Aplicação por Peça:</label>
-                    {% if not pecas or pecas[0] == "GENERICA" %}
-                        <div class="no-parts-warning">⚠ Peças não identificadas. Regra será geral.</div>
-                    {% endif %}
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nome da Peça</th>
-                                    <th style="text-align: right; width: 140px;">Limite (Ciclo)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for peca in pecas %}
-                                <tr>
-                                    <td><strong>{{ peca }}</strong>{% if peca == "GENERICA" %}<br><small>(Geral)</small>{% endif %}</td>
-                                    <td style="text-align: right;"><input type="number" name="limite_{{ peca }}" value="1" min="0"></td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <small style="color: #666; display: block; margin-top: 8px;">* Lógica: Altera X, Pula 1, Zera. Último furo nunca altera.</small>
-                </div>
-
-                <button type="submit" name="acao" value="processar" class="btn btn-green">💾 Processar e Baixar .TAP</button>
-                <button type="submit" name="acao" value="visualizar" class="btn btn-gray">👁️ Apenas Visualizar Desenho</button>
-                <a href="/" class="link-back">Cancelar e Voltar ao Início</a>
+                <button type="submit" name="acao" value="reconfigurar" class="btn btn-gray">⬅ Voltar e Configurar</button>
             </form>
+            <a href="/" class="btn btn-blue" style="flex: 1; max-width: 300px; text-decoration: none;">🔄 Novo Arquivo</a>
         </div>
-        {% endif %}
-
-        {% if step == 'visual' %}
-        <div class="card visual-container" style="text-align: center;">
-            <h2>👁️ Visualização do Caminho</h2>
-
-            {% if preview_img %}
-                <img src="data:image/png;base64,{{ preview_img }}" alt="Preview">
-                <p style="color: #666; margin-top: 15px;">Visualização XY (Superior). Arcos e retas simplificados.</p>
-            {% else %}
-                <p>Erro ao gerar a visualização.</p>
-            {% endif %}
-
-            <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: center;">
-                <form action="/" method="post" style="flex: 1; max-width: 300px;">
-                    <textarea name="conteudo_oculto" style="display:none;">{{ conteudo }}</textarea>
-                    <input type="hidden" name="nome_arquivo_original" value="{{ nome_arquivo }}">
-                    <button type="submit" name="acao" value="reconfigurar" class="btn btn-gray">⬅ Voltar e Configurar</button>
-                </form>
-
-                <a href="/" class="btn btn-blue" style="flex: 1; max-width: 300px; text-decoration: none;">🔄 Novo Arquivo</a>
-            </div>
-        </div>
-        {% endif %}
-
     </div>
-</body>
-</html>
+    {% endif %}
+
+{% endblock %}

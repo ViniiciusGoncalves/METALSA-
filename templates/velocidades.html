@@ -97,7 +97,7 @@
 {% block content %}
 
   <div class="page-title">
-    <h1>Parâmetros de Corte — CNC Plasma</h1>
+    <h1>Parâmetros de Corte — Mesa de corte</h1>
     <p>Velocidades e tensões de corte por espessura e tipo de operação</p>
   </div>
 
@@ -178,7 +178,7 @@
         <!-- 5/8" -->
         <tr>
           <td class="material-cell br bt" rowspan="3">
-            <div class="material-badge"><div class="material-dot dot-58"></div><div><div class="material-name">Chapa 5/8"</div><div class="material-sub">polegada (~15.9mm)</div></div></div>
+            <div class="material-badge"><div class="material-dot dot-58"></div><div><div class="material-name">Chapa 16mm</div><div class="material-sub">polegada 5/8"</div></div></div>
           </td>
           <td class="br2 bt"><div class="cut-type-cell"><div class="cut-icon icon-reto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/></svg></div><span class="cut-label">Corte Reto</span></div></td>
           <td class="speed-cell br2 bt"><span class="chip speed-low">400<span class="unit">mm/min</span></span></td>
@@ -198,7 +198,7 @@
         <!-- 1" -->
         <tr>
           <td class="material-cell br bt" rowspan="3">
-            <div class="material-badge"><div class="material-dot dot-1pol"></div><div><div class="material-name">Chapa 1"</div><div class="material-sub">polegada (~25.4mm)</div></div></div>
+            <div class="material-badge"><div class="material-dot dot-1pol"></div><div><div class="material-name">Chapa 24mm</div><div class="material-sub">polegada 1"</div></div></div>
           </td>
           <td class="br2 bt"><div class="cut-type-cell"><div class="cut-icon icon-reto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/></svg></div><span class="cut-label">Corte Reto</span></div></td>
           <td class="speed-cell br2 bt"><span class="chip speed-low">400<span class="unit">mm/min</span></span></td>
@@ -220,11 +220,11 @@
   <div class="info-bar">
     <div class="info-card">
       <div class="info-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-      <div><strong>Oblongo — rasgo alongado</strong><p>Furo no formato de cápsula. Velocidade reduzida para manter qualidade nas curvas.</p></div>
+      <div><strong>Oblongo — rasgo alongado</strong><p>Velocidade reduzida para manter qualidade nas curvas.</p></div>
     </div>
     <div class="info-card">
       <div class="info-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg></div>
-      <div><strong>Diâmetro — furo circular</strong><p>Velocidade intermediária para garantir circularidade e acabamento na entrada do furo.</p></div>
+      <div><strong>Diâmetro — furo circular</strong><p>Velocidade intermediária para garantir circularidade.</p></div>
     </div>
     <div class="info-card">
       <div class="info-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><line x1="3" y1="8" x2="21" y2="8"/><line x1="3" y1="16" x2="21" y2="16"/></svg></div>
@@ -232,7 +232,7 @@
     </div>
     <div class="info-card">
       <div class="info-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fde047" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-      <div><strong>Tensão de arco (V)</strong><p>Chapas mais espessas exigem tensão mais alta para manter o arco estável.</p></div>
+      <div><strong>Tensão de arco (V)</strong><p>Altura da tocha.</p></div>
     </div>
   </div>
 

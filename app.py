@@ -222,6 +222,9 @@ def index():
     return render_template('index.html', step=step, pecas=pecas_encontradas, conteudo=conteudo_arquivo,
                            preview_img=preview_img, nome_arquivo=nome_arquivo_original)
 
+@app.route('/velocidades')
+def velocidades():
+    return render_template('velocidades.html')
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)

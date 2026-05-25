@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metalsa — {% block title %}{% endblock %}</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #0d0d0d;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: #111111;
+            border-bottom: 1px solid #1e1e1e;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        /* Logo */
+        .logo-wrap {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .logo-wrap img {
+            height: 28px;
+            /* logo tem fundo preto, filtro inverte p/ fundo escuro funcionar */
+            filter: brightness(0) invert(1) saturate(0) brightness(1.1);
+        }
+
+        /* Divisor vertical */
+        .header-divider {
+            width: 1px;
+            height: 28px;
+            background: #2a2a2a;
+            flex-shrink: 0;
+        }
+
+        /* Nav links */
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover {
+            background: #1a1a1a;
+            color: #e2e8f0;
+        }
+
+        .nav-link.active {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .nav-link svg {
+            flex-shrink: 0;
+            opacity: 0.7;
+        }
+
+        .nav-link.active svg {
+            opacity: 1;
+        }
+
+        /* Badge ativo */
+        .nav-link.active::after {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #2563eb;
+            margin-left: 2px;
+        }
+
+        /* Lado direito do header */
+        .header-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-tag {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #374151;
+            background: #1a1a1a;
+            border: 1px solid #222;
+            border-radius: 6px;
+            padding: 4px 10px;
+        }
+
+        /* ===== CONTEÚDO ===== */
+        .page-content {
+            flex: 1;
+            padding: 40px 32px;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            border-top: 1px solid #1a1a1a;
+            padding: 16px 32px;
+            text-align: center;
+            font-size: 12px;
+            color: #374151;
+        }
+    </style>
+    {% block extra_styles %}{% endblock %}
+</head>
+<body>
+
+<header>
+    <div class="header-inner">
+
+        <a href="/" class="logo-wrap">
+            <img src="{{ url_for('static', filename='images/image_1.png') }}" alt="Metalsa">
+        </a>
+
+        <div class="header-divider"></div>
+
+        <nav>
+            <a href="/" class="nav-link {% if active_page == 'editor' %}active{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10,9 9,9 8,9"/>
+                </svg>
+                Editor G-Code
+            </a>
+
+            <a href="/velocidades" class="nav-link {% if active_page == 'velocidades' %}active{% endif %}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12,6 12,12 16,14"/>
+                </svg>
+                Parâmetros CNC
+            </a>
+        </nav>
+
+        <div class="header-right">
+            <span class="header-tag">CNC Plasma</span>
+        </div>
+
+    </div>
+</header>
+
+<div class="page-content">
+    {% block content %}{% endblock %}
+</div>
+
+<footer>
+    Metalsa © 2025 — Sistema interno de parâmetros CNC
+</footer>
+
+</body>
+</html>

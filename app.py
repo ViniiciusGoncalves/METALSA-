@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import base64
 from flask import Flask, render_template, request, send_file
 from io import BytesIO
+from correntes import CORRENTES_ASA, PASSO_POR_ASA, FOLGA_ELOS, calcular_esteira
 
 app = Flask(__name__)
 
@@ -225,6 +226,68 @@ def index():
 @app.route('/velocidades')
 def velocidades():
     return render_template('velocidades.html')
+
+
+# --- CÁLCULO DE CORRENTES ---
+
+@app.route('/correntes', methods=['GET', 'POST'])
+def correntes():
+    modo = request.form.get('modo', 'unico')
+    linhas = []
+    resultados = []
+    total_metros = 0
+    total_elos = 0
+
+    if request.method == 'POST':
+        nomes = request.form.getlist('nome')
+        asas = request.form.getlist('corrente')
+        distancias = request.form.getlist('distancia')
+        z1s = request.form.getlist('z1')
+        z2s = request.form.getlist('z2')
+        qtds = request.form.getlist('qtd')
+
+        # No modo único só a primeira esteira é calculada
+        quantidade_linhas = 1 if modo == 'unico' else len(asas)
+
+        for i in range(quantidade_linhas):
+            linha = {
+                'nome': nomes[i].strip() or f'Esteira {i + 1}',
+                'corrente': asas[i],
+                'distancia': distancias[i],
+                'z1': z1s[i],
+                'z2': z2s[i],
+                'qtd': qtds[i] if modo == 'multiplo' else '1',
+            }
+            linhas.append(linha)
+
+            try:
+                c = float(linha['distancia'].replace(',', '.'))
+                z1 = int(linha['z1'])
+                z2 = int(linha['z2'])
+                qtd = int(linha['qtd'] or 1)
+            except ValueError:
+                resultados.append({'nome': linha['nome'], 'erro': 'Preencha todos os campos com números válidos'})
+                continue
+
+            if linha['corrente'] not in PASSO_POR_ASA:
+                resultados.append({'nome': linha['nome'], 'erro': 'Selecione uma corrente'})
+                continue
+            if c <= 0 or z1 <= 0 or z2 <= 0 or qtd <= 0:
+                resultados.append({'nome': linha['nome'], 'erro': 'Os valores precisam ser maiores que zero'})
+                continue
+
+            resultado = calcular_esteira(linha['corrente'], c, z1, z2, qtd)
+            resultado.update({'nome': linha['nome'], 'corrente': linha['corrente'], 'distancia': c, 'z1': z1, 'z2': z2})
+            resultados.append(resultado)
+            total_metros += resultado['metros_total']
+            total_elos += resultado['elos_total']
+
+    if not linhas:
+        linhas = [{'nome': '', 'corrente': '40', 'distancia': '', 'z1': '', 'z2': '', 'qtd': '1'}]
+
+    return render_template('correntes.html', correntes=CORRENTES_ASA, modo=modo, linhas=linhas,
+                           resultados=resultados, total_metros=total_metros, total_elos=total_elos,
+                           folga_elos=FOLGA_ELOS)
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=False)

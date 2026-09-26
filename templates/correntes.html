@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+{% set active_page = 'correntes' %}
+
+{% block title %}Cálculo de Correntes{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .page-title { margin-bottom: 2rem; }
+  .page-title h1 { font-size: 22px; font-weight: 700; color: #f1f5f9; }
+  .page-title p  { font-size: 14px; color: #64748b; margin-top: 4px; }
+
+  .section-title {
+    font-size: 13px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: #64748b; margin: 2.5rem 0 1rem;
+  }
+
+  .card {
+    background: #161820; border-radius: 14px;
+    border: 1px solid #2a2d3a; overflow: hidden;
+  }
+  .card-body { padding: 24px; }
+
+  /* ===== ABAS ===== */
+  .tabs { display: flex; gap: 4px; padding: 6px; background: #1e2130; border-bottom: 1px solid #2a2d3a; }
+  .tab {
+    flex: 1; padding: 10px 16px; border-radius: 8px; border: none; cursor: pointer;
+    background: transparent; color: #64748b; font: 500 14px 'Segoe UI', sans-serif;
+    transition: background 0.15s, color 0.15s;
+  }
+  .tab:hover { color: #e2e8f0; }
+  .tab.active { background: #161820; color: #ffffff; }
+
+  /* ===== FORMULÁRIO ===== */
+  .esteira {
+    display: grid; gap: 12px; align-items: end;
+    grid-template-columns: 1.2fr 1.4fr 1fr 0.7fr 0.7fr 0.6fr 40px;
+    padding: 16px; border: 1px solid #2a2d3a; border-radius: 10px;
+    background: #12141b; margin-bottom: 12px;
+  }
+  .modo-unico .esteira { grid-template-columns: 1.2fr 1.4fr 1fr 0.7fr 0.7fr; }
+  .modo-unico .esteira:not(:first-child),
+  .modo-unico .campo-qtd,
+  .modo-unico .btn-remover,
+  .modo-unico .btn-adicionar { display: none; }
+
+  .campo label {
+    display: block; font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: #64748b; margin-bottom: 6px;
+  }
+  .campo input, .campo select {
+    width: 100%; padding: 10px 12px; border-radius: 8px;
+    background: #1e2130; border: 1px solid #2a2d3a; color: #f1f5f9;
+    font: 14px 'Segoe UI', sans-serif; outline: none;
+  }
+  .campo input:focus, .campo select:focus { border-color: #2563eb; }
+  .campo .dica { font-size: 11px; color: #475569; margin-top: 4px; font-family: monospace; }
+
+  .btn-remover {
+    width: 40px; height: 40px; border-radius: 8px; cursor: pointer;
+    background: #1e2130; border: 1px solid #2a2d3a; color: #64748b;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .btn-remover:hover { color: #f87171; border-color: #7f1d1d; }
+
+  .acoes { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+  .btn {
+    padding: 11px 20px; border-radius: 8px; cursor: pointer;
+    font: 600 14px 'Segoe UI', sans-serif; border: 1px solid transparent;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primario { background: #2563eb; color: #fff; }
+  .btn-primario:hover { background: #1d4ed8; }
+  .btn-secundario { background: #1e2130; color: #cbd5e1; border-color: #2a2d3a; }
+  .btn-secundario:hover { background: #262a3b; }
+
+  /* ===== RESULTADOS ===== */
+  .resumo { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .resumo-card {
+    flex: 1; min-width: 180px; padding: 18px 20px; border-radius: 12px;
+    background: #161820; border: 1px solid #2a2d3a;
+  }
+  .resumo-card.destaque { background: #111c33; border-color: #1e40af; }
+  .resumo-card .rotulo { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #64748b; }
+  .resumo-card .valor { font-size: 28px; font-weight: 700; color: #f1f5f9; margin-top: 6px; font-family: monospace; }
+  .resumo-card.destaque .valor { color: #60a5fa; }
+  .resumo-card .valor .unit { font-size: 14px; color: #64748b; margin-left: 4px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: #1e2130; }
+  thead th {
+    padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px; color: #64748b;
+    border-bottom: 1px solid #2a2d3a; white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid #1e2130; transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #1a1d2a; }
+  td { padding: 12px 16px; font-size: 14px; color: #cbd5e1; white-space: nowrap; }
+  td.num, th.num { text-align: right; font-family: monospace; }
+  tfoot td { background: #1e2130; font-weight: 700; color: #f1f5f9; border-top: 1px solid #2a2d3a; }
+
+  .chip {
+    display: inline-flex; align-items: center; font-family: monospace;
+    font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 6px;
+    background: #172540; color: #60a5fa; border: 1px solid #1e40af;
+  }
+  .chip-verde { background: #1c2f1a; color: #4ade80; border-color: #166534; }
+  .chip-laranja { background: #2d1f12; color: #fb923c; border-color: #9a3412; }
+  .erro { color: #f87171; }
+
+  .tabela-scroll { overflow-x: auto; }
+
+  .info-card {
+    margin-top: 12px; background: #161820; border: 1px solid #2a2d3a; border-radius: 10px;
+    padding: 12px 16px; font-size: 12px; color: #64748b; line-height: 1.6;
+  }
+  .info-card strong { color: #94a3b8; }
+
+  @media (max-width: 900px) {
+    .esteira, .modo-unico .esteira { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+  <div class="page-title">
+    <h1>Cálculo de Correntes</h1>
+    <p>Comprimento de corrente de rolos (padrão ASA / ANSI B29.1) a partir da distância entre eixos e das engrenagens</p>
+  </div>
+
+  <!-- ===== FORMULÁRIO ===== -->
+  <form method="POST" action="/correntes" id="form-correntes" class="card {% if modo == 'unico' %}modo-unico{% endif %}">
+    <input type="hidden" name="modo" id="modo" value="{{ modo }}">
+
+    <div class="tabs">
+      <button type="button" class="tab {% if modo == 'unico' %}active{% endif %}" data-modo="unico">Cálculo único</button>
+      <button type="button" class="tab {% if modo == 'multiplo' %}active{% endif %}" data-modo="multiplo">Múltiplas esteiras</button>
+    </div>
+
+    <div class="card-body">
+      <div id="lista-esteiras">
+        {% for linha in linhas %}
+        <div class="esteira">
+          <div class="campo">
+            <label>Identificação</label>
+            <input type="text" name="nome" value="{{ linha.nome }}" placeholder="Esteira {{ loop.index }}">
+          </div>
+          <div class="campo">
+            <label>Corrente ASA</label>
+            <select name="corrente">
+              {% for c in correntes %}
+              <option value="{{ c.asa }}" {% if c.asa == linha.corrente %}selected{% endif %}>ASA {{ c.asa }} — {{ c.passo_pol }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="campo">
+            <label>Entre eixos (mm)</label>
+            <input type="text" inputmode="decimal" name="distancia" value="{{ linha.distancia }}" placeholder="ex: 500" required>
+          </div>
+          <div class="campo">
+            <label>Dentes Z1</label>
+            <input type="number" name="z1" min="1" step="1" value="{{ linha.z1 }}" required>
+          </div>
+          <div class="campo">
+            <label>Dentes Z2</label>
+            <input type="number" name="z2" min="1" step="1" value="{{ linha.z2 }}" required>
+          </div>
+          <div class="campo campo-qtd">
+            <label>Qtd.</label>
+            <input type="number" name="qtd" min="1" step="1" value="{{ linha.qtd or 1 }}">
+          </div>
+          <button type="button" class="btn-remover" title="Remover esteira">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="acoes">
+        <button type="button" class="btn btn-secundario btn-adicionar" id="btn-adicionar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Adicionar esteira
+        </button>
+        <button type="submit" class="btn btn-primario">Calcular</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="info-card">
+    <strong>Como é calculado:</strong> engrenagens iguais usam L = 2·(C/P) + Z. Engrenagens diferentes usam
+    L = 2·(C/P) + (Z1+Z2)/2 + [(Z2−Z1)/2π]²·(P/C). O resultado é arredondado para cima e ajustado para um
+    número <strong>par</strong> de elos (evita meio-elo), e são somados <strong>{{ folga_elos }} elos de folga</strong> por esteira. Distância entre eixos em milímetros.
+  </div>
+
+  <!-- ===== RESULTADOS ===== -->
+  {% if resultados %}
+  <h2 class="section-title">Resultado</h2>
+
+  <div class="resumo">
+    <div class="resumo-card destaque">
+      <div class="rotulo">Total de corrente</div>
+      <div class="valor">{{ '%.1f'|format(total_metros) }}<span class="unit">m</span></div>
+    </div>
+    <div class="resumo-card">
+      <div class="rotulo">Total de elos</div>
+      <div class="valor">{{ total_elos }}</div>
+    </div>
+    {% if modo == 'multiplo' %}
+    <div class="resumo-card">
+      <div class="rotulo">Esteiras calculadas</div>
+      <div class="valor">{{ resultados|selectattr('erro', 'undefined')|map(attribute='qtd')|sum }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="card tabela-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Esteira</th>
+          <th>Corrente</th>
+          <th class="num">Entre eixos</th>
+          <th class="num">Z1 / Z2</th>
+          <th>Fórmula</th>
+          <th class="num">Elos (c/ folga)</th>
+          <th class="num">Metros</th>
+          {% if modo == 'multiplo' %}
+          <th class="num">Qtd.</th>
+          <th class="num">Total (m)</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in resultados %}
+        <tr>
+          <td>{{ r.nome }}</td>
+          {% if r.erro %}
+          <td colspan="{{ 8 if modo == 'multiplo' else 6 }}" class="erro">{{ r.erro }}</td>
+          {% else %}
+          <td><span class="chip">ASA {{ r.corrente }}</span></td>
+          <td class="num">{{ '%.1f'|format(r.distancia) }} mm</td>
+          <td class="num">{{ r.z1 }} / {{ r.z2 }}</td>
+          <td>
+            {% if r.tipo == 'iguais' %}<span class="chip chip-verde">Iguais</span>
+            {% else %}<span class="chip chip-laranja">Diferentes</span>{% endif %}
+          </td>
+          <td class="num" title="Teórico: {{ '%.2f'|format(r.elos_teoricos) }} — {{ r.elos - folga_elos }} + {{ folga_elos }} de folga">{{ r.elos }}</td>
+          <td class="num">{{ '%.1f'|format(r.metros) }}</td>
+          {% if modo == 'multiplo' %}
+          <td class="num">{{ r.qtd }}</td>
+          <td class="num">{{ '%.1f'|format(r.metros_total) }}</td>
+          {% endif %}
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+      {% if modo == 'multiplo' %}
+      <tfoot>
+        <tr>
+          <td colspan="8">Total geral</td>
+          <td class="num">{{ '%.1f'|format(total_metros) }}</td>
+        </tr>
+      </tfoot>
+      {% endif %}
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- ===== TABELA ASA ===== -->
+  <h2 class="section-title">Correntes de rolos — padrão ASA / ANSI B29.1</h2>
+
+  <div class="card tabela-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>ASA</th>
+          <th>ISO equiv.</th>
+          <th class="num">Passo (pol)</th>
+          <th class="num">Passo (mm)</th>
+          <th class="num">Largura interna (mm)</th>
+          <th class="num">Ø Rolo (mm)</th>
+          <th class="num">Ø Pino (mm)</th>
+          <th class="num">Ruptura mín. (kN)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in correntes %}
+        <tr>
+          <td><span class="chip">ASA {{ c.asa }}</span></td>
+          <td>{{ c.iso }}</td>
+          <td class="num">{{ c.passo_pol }}</td>
+          <td class="num">{{ '%.3f'|format(c.passo) }}</td>
+          <td class="num">{{ '%.2f'|format(c.largura) }}</td>
+          <td class="num">{{ '%.2f'|format(c.rolo) }}</td>
+          <td class="num">{{ '%.2f'|format(c.pino) }}</td>
+          <td class="num">{{ '%.1f'|format(c.ruptura) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="info-card">
+    <strong>Observações:</strong> valores nominais. ASA 25 e 35 são correntes de bucha (sem rolo) — o valor de
+    "Ø Rolo" é o diâmetro da bucha. ASA 41 é a versão leve da 40 (mesmo passo). Confirme as dimensões no
+    catálogo do fabricante antes da compra.
+  </div>
+
+<script>
+  const form = document.getElementById('form-correntes');
+  const lista = document.getElementById('lista-esteiras');
+  const campoModo = document.getElementById('modo');
+
+  // Troca entre cálculo único e múltiplas esteiras
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      campoModo.value = tab.dataset.modo;
+      form.classList.toggle('modo-unico', tab.dataset.modo === 'unico');
+      atualizarRequired();
+    });
+  });
+
+  // Adiciona uma nova esteira copiando a primeira (com campos vazios)
+  document.getElementById('btn-adicionar').addEventListener('click', () => {
+    const nova = lista.firstElementChild.cloneNode(true);
+    nova.querySelectorAll('input').forEach(input => {
+      input.value = input.name === 'qtd' ? '1' : '';
+    });
+    nova.querySelector('select').value = lista.lastElementChild.querySelector('select').value;
+    lista.appendChild(nova);
+    renumerar();
+    nova.querySelector('input[name="distancia"]').focus();
+  });
+
+  // Remove uma esteira (sempre mantém pelo menos uma)
+  lista.addEventListener('click', e => {
+    const botao = e.target.closest('.btn-remover');
+    if (!botao || lista.children.length === 1) return;
+    botao.closest('.esteira').remove();
+    renumerar();
+  });
+
+  function renumerar() {
+    [...lista.children].forEach((esteira, i) => {
+      esteira.querySelector('input[name="nome"]').placeholder = 'Esteira ' + (i + 1);
+    });
+  }
+
+  // No modo único, as esteiras escondidas não podem bloquear o envio
+  function atualizarRequired() {
+    const unico = campoModo.value === 'unico';
+    [...lista.children].forEach((esteira, i) => {
+      esteira.querySelectorAll('[required], [data-required]').forEach(input => {
+        if (unico && i > 0) {
+          input.removeAttribute('required');
+          input.dataset.required = '1';
+        } else {
+          input.setAttribute('required', '');
+        }
+      });
+    });
+  }
+
+  atualizarRequired();
+</script>
+
+{% endblock %}
